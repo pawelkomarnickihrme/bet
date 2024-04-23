@@ -16,6 +16,10 @@ export default async function ProtectedPage() {
     return redirect("/login");
   }
 
+  let { data: match, error } = await supabase.from("match").select("*");
+
+  console.log(match, error);
+
   return (
     <div className="flex-1 w-full flex flex-col gap-20 items-center">
       <div className="w-full">
