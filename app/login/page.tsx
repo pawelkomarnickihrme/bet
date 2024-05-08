@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { SubmitButton } from "./submit-button";
+import { Button } from "../../components/ui/button";
 
 export default function Login({
   searchParams,
@@ -26,6 +27,20 @@ export default function Login({
     }
 
     return redirect("/protected");
+  };
+  const signWithGoogle = async () => {
+    "use server";
+    const supabase = createClient();
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "http://localhost:3004/auth/callback/",
+      },
+    });
+    if (data.url) {
+      redirect(data.url); // use the redirect API for your server framework
+    }
   };
 
   const signUp = async (formData: FormData) => {
@@ -82,7 +97,6 @@ export default function Login({
           className="rounded-md px-4 py-2 bg-inherit border mb-6"
           name="email"
           placeholder="you@example.com"
-          required
         />
         <label className="text-md" htmlFor="password">
           Password
@@ -92,7 +106,6 @@ export default function Login({
           type="password"
           name="password"
           placeholder="••••••••"
-          required
         />
         <SubmitButton
           formAction={signIn}
@@ -108,6 +121,14 @@ export default function Login({
         >
           Sign Up
         </SubmitButton>
+        <SubmitButton
+          className="border border-foreground/20 rounded-md px-4 py-2 text-foreground mb-2"
+          pendingText="Signing Up..."
+          formAction={signWithGoogle}
+        >
+          Sign in with Google
+        </SubmitButton>
+
         {searchParams?.message && (
           <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
             {searchParams.message}

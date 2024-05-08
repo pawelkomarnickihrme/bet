@@ -27,7 +27,7 @@ const MatchList = () => {
     fetchMatches();
   }, []);
   console.log(matches);
-
+  console.log(matches);
   const saveResult = (id: number, hostsGoals: string, guestsGoals: string) => {
     console.log(
       `Match ${id} result saved: Hosts ${hostsGoals} - Guests ${guestsGoals}`

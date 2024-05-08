@@ -1,17 +1,7 @@
 import React, { useState } from "react";
 import { createClient } from "../../utils/supabase/client";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "../ui/input";
-import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
-import { Card, CardDescription, CardHeader } from "../ui/card";
 interface MatchProps {
   match: {
     match_id: number;
@@ -24,15 +14,16 @@ interface MatchProps {
   };
   onSave: (id: number, hostsGoals: string, guestsGoals: string) => void;
 }
-const Match: React.FC<MatchProps> = ({ match, onSave }) => {
-  const form = useForm();
-
+const Match: React.FC<MatchProps> = ({ match }) => {
   const supabase = createClient();
   const { match_time, match_id, team_a, team_b, result_a, result_b, status } =
     match;
 
   const [hostsGoals, setHostsGoals] = useState(result_a ? result_a : "");
   const [guestsGoals, setGuestsGoals] = useState(result_b ? result_b : "");
+  const [error, setError] = useState<null | string>(null);
+  const [success, setSuccess] = useState<null | string>(null);
+  const isFinished = status === "finished";
   const matchDate = new Date(match_time);
   const niceView = `${matchDate.toLocaleDateString()} ${matchDate.toLocaleTimeString()}`;
   async function updateMatches() {
@@ -45,61 +36,61 @@ const Match: React.FC<MatchProps> = ({ match, onSave }) => {
       })
       .eq("match_id", match_id)
       .select();
-    console.log(data, error);
+    if (error) setError(error.message);
+    else {
+      setError("");
+      setSuccess("Match updated successfully");
+    }
   }
   return (
-    <Card
-      className={`w-96 my-4  ${status === "finished" ? "bg-green-500" : ""}`}
-    >
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(updateMatches)}
-          className="flex flex-col items-center space-y-2"
-        >
-          <div className="flex justify-between items-center">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem className="flex flex-col items-center p-2">
-                  <FormLabel className="">{team_a}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={isNaN(hostsGoals) ? "" : hostsGoals.toString()}
-                      onChange={(e) => setHostsGoals(parseInt(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="pt-8">-</div>
-            <FormField
-              control={form.control}
-              name="guestsGoals"
-              render={({ field }) => (
-                <FormItem className="flex flex-col items-center p-2">
-                  <FormLabel className="">{team_b}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={guestsGoals?.toString() || ""}
-                      onChange={(e) => setGuestsGoals(parseInt(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <div key="1" className="flex flex-col items-center justify-center py-6">
+      <div
+        className={`bg-white dark:bg-gray-900 rounded-lg shadow-lg px-6 pt-2 py-2 w-full border ${
+          isFinished ? "border-green-500" : ""
+        }`}
+      >
+        <div className="text-gray-500  dark:text-gray-400 text-center pb-2 font-medium">
+          {niceView}
+        </div>
+        <div className="flex flex-row items-center justify-between space-x-4">
+          <div className="flex items-center space-x-4">
+            <div className="text-right w-16 font-medium">{team_a}</div>
+            <div className="flex items-center space-x-2">
+              <Input
+                className="w-12 text-center font-bold text-xl"
+                placeholder={hostsGoals.toString() || "0"}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (!isNaN(value)) {
+                    setHostsGoals(value);
+                  }
+                }}
+                max={99}
+              />
+              <span className="font-bold text-2xl">-</span>
+              <Input
+                className="w-12 text-center font-bold text-xl"
+                placeholder={guestsGoals.toString() || "0"}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (!isNaN(value)) {
+                    setGuestsGoals(value);
+                  }
+                }}
+              />
+            </div>
+            <div className="font-medium w-20">{team_b}</div>
+            <Button className="ml-4" onClick={updateMatches}>
+              Submit
+            </Button>
           </div>
-          <Button type="submit" className="mx-auto my-auto">
-            Save Result
-          </Button>
-        </form>
-      </Form>
-      <CardDescription className="text-center pt-2">{niceView}</CardDescription>{" "}
-    </Card>
+        </div>
+        <div className="h-6 text-center pt-2 font-medium">
+          {error && <div className="text-red-500">{error}</div>}
+          {success && <div className="text-green-500">{success}</div>}
+        </div>
+      </div>
+    </div>
   );
 };
 export default Match;
