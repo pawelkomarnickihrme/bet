@@ -12,8 +12,9 @@ interface MatchProps {
     result_b: number | null;
     status: "bet" | "finished";
   };
+  userId: string;
 }
-const Match: React.FC<MatchProps> = ({ match }) => {
+const Match: React.FC<MatchProps> = ({ match, userId }) => {
   const supabase = createClient();
   const { match_time, match_id, team_a, team_b, result_a, result_b, status } =
     match;
@@ -25,15 +26,20 @@ const Match: React.FC<MatchProps> = ({ match }) => {
   const matchDate = new Date(match_time);
   const niceView = `${matchDate.toLocaleDateString()} ${matchDate.toLocaleTimeString()}`;
   async function updateMatches() {
+    console.log(userId);
+
     const { data, error } = await supabase
-      .from("matches")
-      .update({
-        result_a: hostsGoals,
-        result_b: guestsGoals,
-        status: "finished",
-      })
-      .eq("match_id", match_id)
+      .from("predictions")
+      .insert([
+        {
+          match_id: match_id,
+          user: userId,
+          predicted_result_a: hostsGoals,
+          predicted_result_b: guestsGoals,
+        },
+      ])
       .select();
+
     if (error) setError(error.message);
     else {
       setError("");

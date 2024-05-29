@@ -12,7 +12,6 @@ interface MatchProps {
     result_b: number | null;
     status: "bet" | "finished";
   };
-  onSave: (id: number, hostsGoals: string, guestsGoals: string) => void;
 }
 const Match: React.FC<MatchProps> = ({ match }) => {
   const supabase = createClient();

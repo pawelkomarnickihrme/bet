@@ -1,11 +1,5 @@
-import DeployButton from "../components/DeployButton";
-import AuthButton from "../components/AuthButton";
 import { createClient } from "@/utils/supabase/server";
-import ConnectSupabaseSteps from "@/components/tutorial/ConnectSupabaseSteps";
-import SignUpUserSteps from "@/components/tutorial/SignUpUserSteps";
-import Header from "@/components/Header";
 import Table from "@/components/Table/index";
-import { Wyniki } from "../components/wyniki";
 import { redirect } from "next/navigation";
 
 export default async function Index() {
@@ -20,14 +14,9 @@ export default async function Index() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.log(user);
   if (!user) {
     return redirect("/login");
   }
   if (profiles && matches)
-    return (
-      <>
-        <Table profiles={profiles} matches={matches} />
-      </>
-    );
+    return <Table profiles={profiles} matches={matches} />;
 }
